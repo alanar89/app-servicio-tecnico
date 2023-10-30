@@ -1,0 +1,15 @@
+Laravel 
+
+paketes
+
+Passport	token
+
+
+actualizado 10/8/19
+Shinobi	 	Roles	composer require caffeinated/shinobi
+
+
+Native script
+
+SecureStorage	Protección de datos en reposo
+

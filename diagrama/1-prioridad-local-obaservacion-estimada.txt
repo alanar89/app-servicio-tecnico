@@ -1,0 +1,139 @@
+-- MySQL Workbench Synchronization
+-- Generated: 2019-08-03 13:59
+-- Model: New Model
+-- Version: 1.0
+-- Project: Name of the project
+-- Author: Juan
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
+
+ALTER TABLE `ofertasweb`.`servicioespecificaciones` 
+DROP FOREIGN KEY `fk_servicioesp_servicio`,
+DROP FOREIGN KEY `fk_servicioesp_esp`;
+
+ALTER TABLE `ofertasweb`.`cliente` 
+ADD COLUMN `redesSociales` VARCHAR(245) NULL DEFAULT NULL AFTER `idCliente`;
+
+ALTER TABLE `ofertasweb`.`orden` 
+CHANGE COLUMN `observasionTecnico` `idObservasionTecnico` INT(11) NULL DEFAULT NULL ,
+CHANGE COLUMN `fechaAlta` `fechaEntrega` DATE NULL DEFAULT NULL ,
+ADD COLUMN `fechaEstimada` DATE NULL DEFAULT NULL AFTER `fechaEntrega`,
+ADD COLUMN `idPrioridad` INT(11) NULL DEFAULT NULL AFTER `fechaEstimada`,
+ADD COLUMN `idLocal` INT(11) NULL DEFAULT NULL AFTER `idPrioridad`,
+ADD INDEX `fk_orden_local_idx` (`idLocal` ASC);
+
+ALTER TABLE `ofertasweb`.`estadoorden` 
+CHANGE COLUMN `observasion` `idObservasion` INT(11) NULL DEFAULT NULL ,
+ADD COLUMN `precio` VARCHAR(100) NULL DEFAULT NULL AFTER `estadoActual`;
+
+CREATE TABLE IF NOT EXISTS `ofertasweb`.`observacion` (
+  `idObservacion` INT(11) NOT NULL,
+  `observacion` VARCHAR(545) NULL DEFAULT NULL,
+  `tipo` VARCHAR(45) NULL DEFAULT NULL,
+  `idUser` INT(11) NULL DEFAULT NULL,
+  `fecha` DATE NULL DEFAULT NULL,
+  PRIMARY KEY (`idObservacion`),
+  INDEX `fk_observacion_user_idx` (`idUser` ASC),
+  CONSTRAINT `fk_observacion_orden`
+    FOREIGN KEY (`idObservacion`)
+    REFERENCES `ofertasweb`.`orden` (`idorden`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_observacion_estadoorden`
+    FOREIGN KEY (`idObservacion`)
+    REFERENCES `ofertasweb`.`estadoorden` (`idEstadoOrden`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_observacion_user`
+    FOREIGN KEY (`idUser`)
+    REFERENCES `ofertasweb`.`user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `ofertasweb`.`prioridad` (
+  `idPrioridad` INT(11) NOT NULL,
+  `prioridad` VARCHAR(345) NULL DEFAULT NULL,
+  PRIMARY KEY (`idPrioridad`),
+  CONSTRAINT `fk_prioridad_orden`
+    FOREIGN KEY (`idPrioridad`)
+    REFERENCES `ofertasweb`.`orden` (`idorden`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `ofertasweb`.`local` (
+  `idLocal` INT(11) NOT NULL,
+  `local` VARCHAR(145) NULL DEFAULT NULL,
+  `direccion` VARCHAR(245) NULL DEFAULT NULL,
+  PRIMARY KEY (`idLocal`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `ofertasweb`.`recibido` (
+  `idRecibido` INT(11) NOT NULL,
+  `idUser` INT(11) NULL DEFAULT NULL,
+  `idOrden` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`idRecibido`),
+  INDEX `fk_orden_user_idx` (`idUser` ASC),
+  CONSTRAINT `fk_orden_user`
+    FOREIGN KEY (`idUser`)
+    REFERENCES `ofertasweb`.`user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `ofertasweb`.`entrega` (
+  `idEntrega` INT(11) NOT NULL,
+  `idUser` INT(11) NULL DEFAULT NULL,
+  `fecha` DATE NULL DEFAULT NULL,
+  `idOrden` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`idEntrega`),
+  INDEX `fk_entrega_orden_idx` (`idOrden` ASC),
+  INDEX `fk_entrega_user_idx` (`idUser` ASC),
+  CONSTRAINT `fk_entrega_orden`
+    FOREIGN KEY (`idOrden`)
+    REFERENCES `ofertasweb`.`orden` (`idorden`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_entrega_user`
+    FOREIGN KEY (`idUser`)
+    REFERENCES `ofertasweb`.`user` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+ALTER TABLE `ofertasweb`.`servicioespecificaciones` 
+ADD CONSTRAINT `fk_servicioesp_servicio`
+  FOREIGN KEY (`idServicio`)
+  REFERENCES `ofertasweb`.`servicio` (`idServicios`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_servicioesp_esp`
+  FOREIGN KEY (`idEspecificaciones`)
+  REFERENCES `ofertasweb`.`especificacionesproducto` (`idespecificacionesproducto`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+ALTER TABLE `ofertasweb`.`orden` 
+ADD CONSTRAINT `fk_orden_local`
+  FOREIGN KEY (`idLocal`)
+  REFERENCES `ofertasweb`.`local` (`idLocal`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `fk_orden_recibido`
+  FOREIGN KEY (`idorden`)
+  REFERENCES `ofertasweb`.`recibido` (`idRecibido`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
